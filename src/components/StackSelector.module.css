@@ -1,0 +1,36 @@
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s;
+  white-space: nowrap;
+}
+
+.chip:hover {
+  border-color: rgba(232,255,71,0.4);
+  color: var(--text);
+}
+
+.chip.selected {
+  border-color: var(--accent);
+  background: rgba(232,255,71,0.08);
+  color: var(--accent);
+}
+
+.icon { font-size: 15px; }
+.label { line-height: 1; }

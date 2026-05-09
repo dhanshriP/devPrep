@@ -1,0 +1,207 @@
+.wrap { display: flex; flex-direction: column; gap: 24px; }
+
+.section { display: flex; flex-direction: column; gap: 12px; }
+
+.label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.btnRow { display: flex; }
+
+.generateBtn {
+  padding: 11px 28px;
+  background: var(--accent);
+  color: #000;
+  border: none;
+  border-radius: var(--radius);
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.18s;
+  letter-spacing: 0.2px;
+}
+
+.generateBtn:hover:not(:disabled) {
+  background: #d4eb00;
+  transform: translateY(-1px);
+}
+
+.generateBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.error {
+  background: rgba(255,80,80,0.08);
+  border: 1px solid rgba(255,80,80,0.2);
+  border-radius: 10px;
+  padding: 14px 18px;
+  color: #FF8080;
+  font-size: 13px;
+  font-family: var(--font-mono);
+}
+
+.loadingWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 56px 20px;
+}
+
+.spinner {
+  display: inline-block;
+  width: 28px;
+  height: 28px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+  flex-shrink: 0;
+}
+
+.loadingText {
+  color: var(--muted);
+  font-size: 13px;
+  font-family: var(--font-mono);
+}
+
+.empty {
+  text-align: center;
+  padding: 64px 20px;
+}
+
+.emptyIcon { font-size: 44px; margin-bottom: 12px; }
+.emptyTitle { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+.emptySub { font-size: 13px; color: var(--muted); }
+
+/* Tip Card */
+.tipCard {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 32px;
+  position: relative;
+  overflow: hidden;
+  animation: fadeUp 0.35s ease both;
+}
+
+.tipCard::after {
+  content: '';
+  position: absolute;
+  top: -60px; right: -60px;
+  width: 240px; height: 240px;
+  background: radial-gradient(circle, rgba(232,255,71,0.05) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.tipMeta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.date {
+  font-size: 12px;
+  color: var(--muted);
+  font-family: var(--font-mono);
+}
+
+.badge {
+  padding: 3px 10px;
+  background: rgba(232,255,71,0.1);
+  border: 1px solid rgba(232,255,71,0.2);
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.title {
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.3;
+  letter-spacing: -0.5px;
+  margin-bottom: 14px;
+}
+
+.body {
+  font-size: 14px;
+  line-height: 1.8;
+  color: #C0C0D0;
+  margin-bottom: 0;
+}
+
+.code {
+  background: #0D0D14;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin-top: 18px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.7;
+  color: #A8E6B0;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+.tldr {
+  margin-top: 18px;
+  padding: 12px 16px;
+  background: rgba(255,107,53,0.06);
+  border-left: 3px solid var(--accent2);
+  border-radius: 0 8px 8px 0;
+  font-size: 13px;
+  color: #D0D0E0;
+  line-height: 1.6;
+}
+
+.tldrLabel {
+  font-weight: 800;
+  color: var(--accent2);
+  margin-right: 8px;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+/* History */
+.historySection { display: flex; flex-direction: column; gap: 10px; }
+
+.historyList { display: flex; flex-direction: column; gap: 6px; }
+
+.historyItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.historyStack {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--accent);
+  background: rgba(232,255,71,0.08);
+  padding: 2px 8px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.historyTitle {
+  font-size: 13px;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
