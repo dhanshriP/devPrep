@@ -154,7 +154,7 @@ export default function App() {
 
         <main className="main">
           <div className="page-title">
-            {tab === 'interview' ? '// interview questions' : '// daily insight'}
+            {tab === 'interview' ? 'interview questions' : 'daily insight'}
           </div>
           {tab === 'interview' ? <InterviewPrep /> : <DailyTip />}
         </main>
