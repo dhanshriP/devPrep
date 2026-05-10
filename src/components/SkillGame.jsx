@@ -133,7 +133,7 @@ const SkillGame = ({ role, domainStack }) => {
               {questions[currentIdx].options.map((opt, i) => (
                 <button 
                   key={i} 
-                  className={`opt-tile ${selectedOption === i ? (i === questions[currentIdx].answer ? 'correct' : 'wrong') : ''} ${selectedOption !== null && i === questions[currentIdx].answer ? 'reveal' : ''}`}
+                  className={`opt-tile ${selectedOption === i ? (i === questions[currentIdx].answer ? 'correct-flash' : 'wrong-flash') : ''} ${selectedOption !== null && i === questions[currentIdx].answer ? 'reveal-correct' : ''}`}
                   onClick={() => handleAnswer(i)}
                   disabled={selectedOption !== null}
                 >
