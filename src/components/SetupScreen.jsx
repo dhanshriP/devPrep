@@ -103,7 +103,7 @@ const SetupScreen = ({ onSetupComplete }) => {
           <div className="form-group">
             <label>TARGET COMPANY CULTURE</label>
             <select value={companyStyle} onChange={(e) => setCompanyStyle(e.target.value)}>
-              <option value="">Select style</option>
+              <option value="">Select target culture</option>
               {companyStyles.map(cs => <option key={cs} value={cs}>{cs}</option>)}
             </select>
           </div>

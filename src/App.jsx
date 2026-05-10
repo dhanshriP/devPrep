@@ -33,11 +33,11 @@ const App = () => {
   };
 
   const dummyScorecard = {
-    clarity: "Excellent articulation of technical concepts with clear business context.",
-    depth: "Strong understanding of tradeoffs, though could dive deeper into operational excellence.",
-    structure: "Methodical approach to problem-solving, following a logical framework.",
-    redFlags: "None identified.",
-    weaknessTrackerUpdate: "Strategic alignment and scaling complexities."
+    clarity: "Strong executive presence. You moved beyond tactical implementation to business outcomes.",
+    depth: "Demonstrated 2026-scale architectural maturity. Excellent risk-mitigation strategy.",
+    structure: "Methodical and framework-driven. Very little fluff in the responses.",
+    redFlags: "None. You are currently trending in the top 5% of candidates.",
+    weaknessTrackerUpdate: "Consider deepening cross-region AI orchestration trade-offs."
   };
 
   return (
@@ -45,60 +45,68 @@ const App = () => {
       {currentScreen === 'setup' ? (
         <SetupScreen onSetupComplete={handleSetupComplete} />
       ) : (
-        <div className="dashboard">
-          <aside className="dashboard-sidebar">
-            <div className="logo-area">
-              <h1>DevPrep.ai</h1>
+        <div className="dashboard-grid">
+          <aside className="sidebar-elite">
+            <div className="sidebar-brand">
+              <h1>DevPrep<span>.ai</span></h1>
             </div>
             
-            <div className="profile-card">
-              <h3>{interviewSettings?.role}</h3>
-              <p>{interviewSettings?.level}</p>
-              <div className="tech-tag">
-                {isTechnicalRole(interviewSettings?.role) ? "Stack: " : "Focus: "}
-                {interviewSettings?.domainStack}
+            <div className="profile-widget">
+              <div className="profile-header">
+                <h3>{interviewSettings?.role}</h3>
+                <span className="pill-badge">{interviewSettings?.level}</span>
+              </div>
+              <div className="tech-context">
+                <span className="context-tag">
+                  {isTechnicalRole(interviewSettings?.role) ? "Stack: " : "Focus: "}
+                  {interviewSettings?.domainStack}
+                </span>
               </div>
             </div>
 
-            <nav className="nav-links">
+            <nav className="sidebar-nav">
               <button 
-                className={`nav-btn ${activeTab === 'interview' ? 'active' : ''}`}
+                className={`nav-link ${activeTab === 'interview' ? 'active' : ''}`}
                 onClick={() => setActiveTab('interview')}
               >
-                <span className="icon">🎙️</span> Mock Interview
+                <span className="nav-icon">🎙️</span> 
+                <span className="nav-text">Evaluation</span>
               </button>
               <button 
-                className={`nav-btn ${activeTab === 'daily' ? 'active' : ''}`}
+                className={`nav-link ${activeTab === 'daily' ? 'active' : ''}`}
                 onClick={() => setActiveTab('daily')}
               >
-                <span className="icon">🧩</span> Daily Scenario
+                <span className="nav-icon">🧩</span> 
+                <span className="nav-text">Scenarios</span>
               </button>
               <button 
-                className={`nav-btn ${activeTab === 'game' ? 'active' : ''}`}
+                className={`nav-link ${activeTab === 'game' ? 'active' : ''}`}
                 onClick={() => setActiveTab('game')}
               >
-                <span className="icon">⚡</span> 
-                {isTechnicalRole(interviewSettings?.role) ? "Tech Sprint" : "Leadership Sprint"}
+                <span className="nav-icon">⚡</span> 
+                <span className="nav-text">The Sprint</span>
               </button>
             </nav>
 
-            <div className="sidebar-footer">
-              <button className="reset-btn" onClick={handleResetSettings}>
-                <span>🔄</span> Change Profile
+            <div className="sidebar-bottom">
+              <button className="change-profile-btn" onClick={handleResetSettings}>
+                <span className="btn-icon">🔄</span>
+                <span>Reset Assessment</span>
               </button>
             </div>
           </aside>
 
-          <main className="dashboard-main">
-            <div className="tab-panel">
+          <main className="main-viewport">
+            <div className="content-container-pro">
               {activeTab === 'interview' && (
-                <div className="interview-section">
+                <div className="module-view">
                   {interviewState === 'idle' && (
-                    <div className="welcome-box">
-                      <h2>Mock Interview</h2>
-                      <p>Start a conversational session tailored for <strong>{interviewSettings?.domainStack}</strong>. AI will simulate a real company interview.</p>
-                      <button className="primary-btn" onClick={() => setInterviewState('ongoing')}>
-                        Launch Session 🚀
+                    <div className="welcome-glass-card">
+                      <div className="card-decorator">READY</div>
+                      <h2>Executive Evaluation</h2>
+                      <p>A conversational session calibrated for <strong>{interviewSettings?.domainStack}</strong>. No generic Q&A.</p>
+                      <button className="primary-action-btn" onClick={() => setInterviewState('ongoing')}>
+                        Begin Evaluation 🚀
                       </button>
                     </div>
                   )}
