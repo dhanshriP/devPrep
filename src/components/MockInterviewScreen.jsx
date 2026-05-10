@@ -18,7 +18,7 @@ const MockInterviewScreen = ({ interviewSettings, onEndInterview }) => {
         },
         {
           sender: 'ai',
-          text: 'Let's start with your experience. Could you tell me about a challenging project you've worked on in this domain?'
+          text: 'Let\'s start with your experience. Could you tell me about a challenging project you\'ve worked on in this domain?'
         }
       ]);
       setConversationTurns(1); // Initial question is the first turn
@@ -32,12 +32,12 @@ const MockInterviewScreen = ({ interviewSettings, onEndInterview }) => {
 
   const getSimulatedAIResponse = () => {
     const responses = [
-      'That's interesting. Can you elaborate on the specific technical challenges you faced in that project and how you overcame them?',
+      'That\'s interesting. Can you elaborate on the specific technical challenges you faced in that project and how you overcame them?',
       'Could you dive deeper into the design choices you made and the trade-offs involved?',
       'How would you have approached that problem differently if you had more resources or a different timeline?',
       'What was your role in resolving that issue, and what was the impact on the project?',
       'Suppose you encountered a similar problem with a stricter performance requirement. How would your solution change?',
-      'Let's consider scalability. How would your proposed solution handle a significant increase in load or data?',
+      'Let\'s consider scalability. How would your proposed solution handle a significant increase in load or data?',
       'From an architectural perspective, where does this solution fit into a larger system, and what are its dependencies?',
       'That sounds complex. Can you walk me through the debugging steps or diagnostic process you used?',
       'How do you ensure the quality and reliability of your code in such a scenario?',
