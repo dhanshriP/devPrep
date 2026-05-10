@@ -37,8 +37,8 @@ const App = () => {
     clarity: "Strong executive presence. You moved beyond tactical implementation to business outcomes.",
     depth: "Demonstrated profound architectural maturity. Excellent risk-mitigation strategy.",
     structure: "Methodical and framework-driven. Response was concise and high-signal.",
-    redFlags: "None. You are currently trending in the top 5% of industry candidates.",
-    weaknessTrackerUpdate: "Consider deepening cross-region orchestration trade-offs."
+    redFlags: "None. You are currently trending in the top 5% of candidates.",
+    weaknessTrackerUpdate: "Strategic alignment and cross-region scaling complexities."
   };
 
   return (
@@ -47,7 +47,7 @@ const App = () => {
         <SetupScreen onSetupComplete={handleSetupComplete} />
       ) : (
         <div className="dashboard-grid">
-          <aside className="sidebar-pro">
+          <aside className="sidebar-elite">
             <div className="sidebar-brand">
               <h1>DevPrep<span>.ai</span></h1>
             </div>
@@ -78,7 +78,7 @@ const App = () => {
                 onClick={() => setActiveTab('latest')}
               >
                 <span className="nav-icon">🔥</span> 
-                <span className="nav-text">Market Trends</span>
+                <span className="nav-text">Latest Trends</span>
               </button>
               <button 
                 className={`nav-link ${activeTab === 'daily' ? 'active' : ''}`}
@@ -111,8 +111,8 @@ const App = () => {
                   {interviewState === 'idle' && (
                     <div className="welcome-glass-card">
                       <div className="card-badge">STATUS: READY</div>
-                      <h2>Elite Evaluation</h2>
-                      <p>Start a conversational session tailored for <strong>{interviewSettings?.domainStack}</strong>. Move beyond the basics.</p>
+                      <h2>Executive Evaluation</h2>
+                      <p>A conversational session tailored for <strong>{interviewSettings?.domainStack}</strong>. Move beyond the basics.</p>
                       <button className="primary-action-btn" onClick={() => setInterviewState('ongoing')}>
                         Initiate Evaluation 🚀
                       </button>
