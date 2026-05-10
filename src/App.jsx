@@ -23,11 +23,6 @@ const App = () => {
     setInterviewState('result');
   };
 
-  const handleStartNewInterview = () => {
-    setInterviewState('idle');
-    setCurrentScorecard(null);
-  };
-
   const handleResetSettings = () => {
     setCurrentScreen('setup');
     setInterviewSettings(null);
@@ -38,9 +33,9 @@ const App = () => {
   const dummyScorecard = {
     clarity: "Good clarity in explaining concepts, though some explanations lacked concrete examples.",
     depth: "Demonstrated good surface-level understanding, but struggled when probed for deeper technical details.",
-    structure: "Responses were generally well-structured. Could improve on summarizing key takeaways.",
+    structure: "Responses were generally well-structured.",
     redFlags: "No major red flags identified.",
-    weaknessTrackerUpdate: "Added 'Scalability' and 'Memory Management' to weakness tracker."
+    weaknessTrackerUpdate: "Added 'Scalability' to weakness tracker."
   };
 
   return (
@@ -49,72 +44,82 @@ const App = () => {
         <SetupScreen onSetupComplete={handleSetupComplete} />
       ) : (
         <div className="dashboard">
-          <header className="dashboard-header">
-            <div className="profile-summary">
-              <h1>DevPrep Dashboard</h1>
-              <p>{interviewSettings?.role} • {interviewSettings?.level} • {interviewSettings?.domainStack}</p>
+          <aside className="dashboard-sidebar">
+            <div className="logo-area">
+              <h1>DevPrep.ai</h1>
             </div>
-            <button className="reset-btn" onClick={handleResetSettings}>Change Profile</button>
-          </header>
+            
+            <div className="profile-card">
+              <h3>{interviewSettings?.role}</h3>
+              <p>{interviewSettings?.level}</p>
+              <p className="tech-tag">{interviewSettings?.domainStack}</p>
+            </div>
 
-          <nav className="dashboard-nav">
-            <button 
-              className={activeTab === 'interview' ? 'active' : ''} 
-              onClick={() => setActiveTab('interview')}
-            >
-              Interview Prep
-            </button>
-            <button 
-              className={activeTab === 'daily' ? 'active' : ''} 
-              onClick={() => setActiveTab('daily')}
-            >
-              Daily Challenge
-            </button>
-            <button 
-              className={activeTab === 'game' ? 'active' : ''} 
-              onClick={() => setActiveTab('game')}
-            >
-              Tech Sprint Game
-            </button>
-          </nav>
+            <nav className="nav-links">
+              <button 
+                className={`nav-btn ${activeTab === 'interview' ? 'active' : ''}`}
+                onClick={() => setActiveTab('interview')}
+              >
+                <span className="icon">🎙️</span> Mock Interview
+              </button>
+              <button 
+                className={`nav-btn ${activeTab === 'daily' ? 'active' : ''}`}
+                onClick={() => setActiveTab('daily')}
+              >
+                <span className="icon">🧩</span> Daily Scenario
+              </button>
+              <button 
+                className={`nav-btn ${activeTab === 'game' ? 'active' : ''}`}
+                onClick={() => setActiveTab('game')}
+              >
+                <span className="icon">⚡</span> Tech Sprint
+              </button>
+            </nav>
+
+            <div className="sidebar-footer">
+              <button className="reset-btn" onClick={handleResetSettings}>
+                Change Profile
+              </button>
+            </div>
+          </aside>
 
           <main className="dashboard-main">
-            {activeTab === 'interview' && (
-              <div className="tab-content">
-                {interviewState === 'idle' && (
-                  <div className="welcome-box">
-                    <h2>Ready for your Mock Interview?</h2>
-                    <p>Based on your profile, I've prepared a conversational session to test your knowledge in {interviewSettings?.domainStack}.</p>
-                    <button className="primary-btn" onClick={() => setInterviewState('ongoing')}>Start Mock Session</button>
-                  </div>
-                )}
-                {interviewState === 'ongoing' && (
-                  <MockInterviewScreen 
-                    interviewSettings={interviewSettings} 
-                    onEndInterview={() => handleEndInterview(dummyScorecard)} 
-                  />
-                )}
-                {interviewState === 'result' && (
-                  <ScorecardScreen 
-                    interviewSettings={interviewSettings} 
-                    scorecard={currentScorecard} 
-                    onStartNewInterview={handleStartNewInterview} 
-                  />
-                )}
-              </div>
-            )}
+            <div className="tab-panel">
+              {activeTab === 'interview' && (
+                <div className="interview-section">
+                  {interviewState === 'idle' && (
+                    <div className="welcome-box">
+                      <h2>Mock Interview</h2>
+                      <p>Start a conversational session for <strong>{interviewSettings?.domainStack}</strong>. AI will push your limits.</p>
+                      <button className="primary-btn" onClick={() => setInterviewState('ongoing')}>
+                        Launch Session
+                      </button>
+                    </div>
+                  )}
+                  {interviewState === 'ongoing' && (
+                    <MockInterviewScreen 
+                      interviewSettings={interviewSettings} 
+                      onEndInterview={() => handleEndInterview(dummyScorecard)} 
+                    />
+                  )}
+                  {interviewState === 'result' && (
+                    <ScorecardScreen 
+                      interviewSettings={interviewSettings} 
+                      scorecard={currentScorecard} 
+                      onStartNewInterview={() => setInterviewState('idle')} 
+                    />
+                  )}
+                </div>
+              )}
 
-            {activeTab === 'daily' && (
-              <div className="tab-content">
+              {activeTab === 'daily' && (
                 <DailyScenario />
-              </div>
-            )}
+              )}
 
-            {activeTab === 'game' && (
-              <div className="tab-content">
+              {activeTab === 'game' && (
                 <SkillGame techStack={interviewSettings?.domainStack} />
-              </div>
-            )}
+              )}
+            </div>
           </main>
         </div>
       )}

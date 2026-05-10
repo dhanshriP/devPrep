@@ -64,42 +64,45 @@ const DailyScenario = () => {
 
   return (
     <div className="daily-scenario-container">
-      <h3>Daily Challenge: {currentChallenge.title}</h3>
-      {!challengeActive && !challengeCompleted && (
-        <p>{currentChallenge.description}</p>
-      )}
+      <div className="header-row">
+         <h3>Daily Challenge</h3>
+         {challengeActive && <span className="timer-pill">Time Left: {formatTime(timeLeft)}</span>}
+      </div>
       
-      {!challengeActive && !challengeCompleted && (
-        <button onClick={handleStartChallenge}>Start 3-Min Challenge</button>
-      )}
+      <div className="challenge-body">
+        <h4>{currentChallenge.title}</h4>
+        
+        {!challengeActive && !challengeCompleted && (
+          <>
+            <p className="description">{currentChallenge.description}</p>
+            <button className="primary-btn" onClick={handleStartChallenge}>Start 3-Min Challenge</button>
+          </>
+        )}
 
-      {challengeActive && (
-        <div className="challenge-active">
-          <p>Time Left: {formatTime(timeLeft)}</p>
-          <p className="challenge-description">{currentChallenge.description}</p>
-          <textarea 
-            placeholder="Your thoughts..." 
-            rows="4" 
-            className="challenge-textarea"
-          ></textarea>
-          {timeLeft === 0 && <p>Time's up!</p>}
-        </div>
-      )}
+        {challengeActive && (
+          <div className="active-ui">
+            <p className="description">{currentChallenge.description}</p>
+            <textarea 
+              placeholder="Draft your solution here..." 
+              className="challenge-textarea"
+            ></textarea>
+            <div className="actions">
+               <button className="reset-btn" onClick={handleResetChallenge}>Give Up</button>
+            </div>
+          </div>
+        )}
 
-      {challengeCompleted && (
-        <div className="challenge-completed">
-          <p>Challenge completed!</p>
-          <h4>Solution:</h4>
-          <p>{currentChallenge.solution}</p>
-          <button onClick={handleResetChallenge}>New Daily Challenge</button>
-        </div>
-      )}
-
-      {(challengeActive || challengeCompleted) && !challengeCompleted && (
-         <button onClick={handleResetChallenge} style={{ marginTop: "10px" }}>
-            Reset
-         </button>
-      )}
+        {challengeCompleted && (
+          <div className="completed-ui">
+            <div className="success-badge">Challenge Completed!</div>
+            <div className="solution-box">
+              <h5>Recommended Approach:</h5>
+              <p>{currentChallenge.solution}</p>
+            </div>
+            <button className="primary-btn" onClick={handleResetChallenge}>Next Challenge</button>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
