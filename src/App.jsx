@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import SetupScreen from './components/SetupScreen';
 import MockInterviewScreen from './components/MockInterviewScreen';
 import ScorecardScreen from './components/ScorecardScreen';
+import DailyScenario from './components/DailyScenario'; // Import the new component
 import './App.css'; // Assuming you have some basic styling
 
 const App = () => {
@@ -36,24 +37,29 @@ const App = () => {
 
   return (
     <div className="App">
-      {currentScreen === 'setup' && (
-        <SetupScreen onSetupComplete={handleSetupComplete} />
-      )}
+      <div className="main-content">
+        {currentScreen === 'setup' && (
+          <SetupScreen onSetupComplete={handleSetupComplete} />
+        )}
 
-      {currentScreen === 'interview' && interviewSettings && (
-        <MockInterviewScreen 
-          interviewSettings={interviewSettings} 
-          onEndInterview={() => handleEndInterview(dummyScorecard)} // Pass dummy data for now
-        />
-      )}
+        {currentScreen === 'interview' && interviewSettings && (
+          <MockInterviewScreen 
+            interviewSettings={interviewSettings} 
+            onEndInterview={() => handleEndInterview(dummyScorecard)} 
+          />
+        )}
 
-      {currentScreen === 'scorecard' && (
-        <ScorecardScreen 
-          interviewSettings={interviewSettings} 
-          scorecard={currentScorecard} 
-          onStartNewInterview={handleStartNewInterview} 
-        />
-      )}
+        {currentScreen === 'scorecard' && (
+          <ScorecardScreen 
+            interviewSettings={interviewSettings} 
+            scorecard={currentScorecard} 
+            onStartNewInterview={handleStartNewInterview} 
+          />
+        )}
+      </div>
+      
+      {/* Daily Scenario, always visible */}
+      <DailyScenario />
     </div>
   );
 };
