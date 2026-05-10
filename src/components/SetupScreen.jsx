@@ -6,15 +6,19 @@ const SetupScreen = ({ onSetupComplete }) => {
   const [domainStack, setDomainStack] = useState('');
   const [companyStyle, setCompanyStyle] = useState('');
 
-  const roles = ["SDE", "Principal Engineer", "TPM", "EM", "Scrum Master", "Delivery Manager"];
+  const roles = ["SDE", "Principal Engineer", "TPM", "EM", "Scrum Master", "Delivery Manager", "Business Analyst"];
   const levels = ["Junior", "Mid", "Senior", "Staff", "Principal"];
   
   const techStacks = [
-    "Android (Kotlin, Jetpack Compose)", 
-    "React (Node.js)", 
-    "Python (Django/Flask)", 
-    "Go (Microservices)", 
-    "CI/CD", 
+    "iOS (Swift, SwiftUI)",
+    "Node.js (Backend, Microservices)",
+    "JavaScript (Frontend, TypeScript, React)",
+    "Android (Kotlin, Compose)", 
+    "Java (Spring Boot, Cloud Native)",
+    "C++ (Low-level, Performance)",
+    "Python (AI, Data Science, FastAPI)", 
+    "Go (Cloud Native, Scalability)", 
+    "CI/CD & Platform Engineering", 
     "Cloud Architecture (AWS/Azure/GCP)"
   ];
   
@@ -27,17 +31,39 @@ const SetupScreen = ({ onSetupComplete }) => {
     "Process Optimization",
     "Technical Program Execution"
   ];
-  
-  const companyStyles = ["FAANG", "Startup", "Mid-size", "Enterprise"];
 
-  const isTechnicalRole = role === "SDE" || role === "Principal Engineer" || role === "EM";
+  const baFocus = [
+    "Requirements Engineering",
+    "Process Modeling (BPMN)",
+    "Data Analytics & SQL",
+    "User Story Mapping",
+    "UAT & Gap Analysis",
+    "Business Case Development"
+  ];
+  
+  const companyStyles = ["FAANG", "High-Growth Startup", "Mid-size Tech", "Legacy Enterprise"];
+
+  const isTechnicalRole = ["SDE", "Principal Engineer", "EM"].includes(role);
+  const isBARole = role === "Business Analyst";
+
+  const getFocusOptions = () => {
+    if (isTechnicalRole) return techStacks;
+    if (isBARole) return baFocus;
+    return managementFocus;
+  };
+
+  const getFocusLabel = () => {
+    if (isTechnicalRole) return "CORE TECH STACK";
+    if (isBARole) return "ANALYTICS & FOCUS AREA";
+    return "MANAGEMENT FOCUS AREA";
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (role && level && domainStack && companyStyle) {
       onSetupComplete({ role, level, domainStack, companyStyle });
     } else {
-      alert("Please fill all fields to start the interview.");
+      alert("Please fill all fields to begin your 2026 assessment.");
     }
   };
 
@@ -45,53 +71,45 @@ const SetupScreen = ({ onSetupComplete }) => {
     <div className="setup-screen">
       <div className="setup-header">
         <h1>DevPrep.ai</h1>
-        <p className="setup-subtitle">Personalize your high-stakes interview experience</p>
+        <p className="setup-subtitle">Elite 2026 Career Intelligence Suite</p>
       </div>
 
       <div className="setup-card">
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="role">Your Role</label>
-            <select id="role" value={role} onChange={(e) => {
-              setRole(e.target.value);
-              setDomainStack(''); // Reset selection when role changes
-            }}>
-              <option value="">Select your role</option>
+            <label>YOUR ROLE</label>
+            <select value={role} onChange={(e) => { setRole(e.target.value); setDomainStack(''); }}>
+              <option value="">Select role</option>
               {roles.map(r => <option key={r} value={r}>{r}</option>)}
             </select>
           </div>
 
           <div className="form-group">
-            <label htmlFor="level">Experience Level</label>
-            <select id="level" value={level} onChange={(e) => setLevel(e.target.value)}>
+            <label>EXPERIENCE LEVEL</label>
+            <select value={level} onChange={(e) => setLevel(e.target.value)}>
               <option value="">Select your level</option>
               {levels.map(l => <option key={l} value={l}>{l}</option>)}
             </select>
           </div>
 
           <div className="form-group">
-            <label htmlFor="domainStack">
-              {isTechnicalRole ? "Core Tech Stack" : "Primary Focus Area"}
-            </label>
-            <select id="domainStack" value={domainStack} onChange={(e) => setDomainStack(e.target.value)}>
-              <option value="">Select {isTechnicalRole ? "stack" : "focus"}</option>
-              {isTechnicalRole 
-                ? techStacks.map(ds => <option key={ds} value={ds}>{ds}</option>)
-                : managementFocus.map(mf => <option key={mf} value={mf}>{mf}</option>)
-              }
+            <label>{getFocusLabel()}</label>
+            <select value={domainStack} onChange={(e) => setDomainStack(e.target.value)}>
+              <option value="">Select focus</option>
+              {getFocusOptions().map(opt => <option key={opt} value={opt}>{opt}</option>)}
             </select>
           </div>
 
           <div className="form-group">
-            <label htmlFor="companyStyle">Target Company Culture</label>
-            <select id="companyStyle" value={companyStyle} onChange={(e) => setCompanyStyle(e.target.value)}>
-              <option value="">Select company style</option>
+            <label>TARGET COMPANY CULTURE</label>
+            <select value={companyStyle} onChange={(e) => setCompanyStyle(e.target.value)}>
+              <option value="">Select style</option>
               {companyStyles.map(cs => <option key={cs} value={cs}>{cs}</option>)}
             </select>
           </div>
           
           <button type="submit" className="primary-btn wide-btn">
-            Launch Mock Interview 🚀
+            Initiate 2026 Evaluation 🚀
           </button>
         </form>
       </div>

@@ -6,36 +6,37 @@ const SkillGame = ({ role, domainStack }) => {
   const [questions, setQuestions] = useState([]);
   const [score, setScore] = useState(0);
   const [currentIdx, setCurrentIdx] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(15);
+  const [timeLeft, setTimeLeft] = useState(12);
   const [selectedOption, setSelectedOption] = useState(null);
   const [streak, setStreak] = useState(0);
   const [error, setError] = useState(null);
 
-  const isTechnical = ["SDE", "Principal Engineer", "EM"].includes(role);
+  const isStrategic = ["TPM", "Scrum Master", "Delivery Manager", "Business Analyst"].includes(role);
 
   const fetchQuestions = async () => {
     setGameState('loading');
     setError(null);
     try {
-      const systemPrompt = `You are a technical game designer for a developer portal. 
-      Generate 5 challenging, unique multiple-choice questions for a ${role} with expertise in ${domainStack}.
+      const systemPrompt = `You are an Elite Assessment Designer in 2026. 
+      Generate 5 hyper-relevant, high-stakes multiple-choice questions for a ${role} with expertise in ${domainStack}.
       
-      RULES:
-      - If role is TPM/Scrum Master/Delivery Manager, focus on scenarios: "A stakeholder demands X, what do you do?", "Velocity dropped by 20%, what's the first step?", etc. NO CODING.
-      - If role is SDE/Principal, focus on high-level architecture and deep tech trade-offs.
+      INTENSITY GUIDELINES:
+      - YEAR: 2026. Context is high-scale, AI-integrated environments.
+      - ROLE ACCURACY: If role is ${role} (Strategic), focus on Situational Leadership, Requirements Volatility, Risk Mitigation, and Delivery Metrics. NO CODING/CACHING questions.
+      - If Technical, focus on high-order trade-offs and 2026 architecture.
       - Each question must have 4 options and 1 correct answer (index 0-3).
-      - Return ONLY a JSON array of objects: [{"question": "...", "options": ["...", "..."], "answer": 0}, ...]`;
+      - Return ONLY a JSON array: [{"question": "...", "options": ["...", "..."], "answer": 0}, ...]`;
       
-      const raw = await callLLM(`Generate a "Tech Sprint" game for ${role} / ${domainStack}`, systemPrompt);
+      const raw = await callLLM(`Generate an elite 2026 evaluation for ${role}`, systemPrompt);
       const data = safeParseJSON(raw);
       setQuestions(data);
       setGameState('playing');
       setCurrentIdx(0);
       setScore(0);
       setStreak(0);
-      setTimeLeft(15);
+      setTimeLeft(12);
     } catch (err) {
-      setError("AI was too busy playing games. Try again!");
+      setError("Grid sync failed. Retrying...");
       setGameState('start');
     }
   };
@@ -57,8 +58,9 @@ const SkillGame = ({ role, domainStack }) => {
     const correct = idx === questions[currentIdx].answer;
     
     if (correct) {
-      const bonus = streak * 2;
-      setScore(prev => prev + 10 + bonus);
+      const timeBonus = timeLeft * 2;
+      const streakBonus = streak * 5;
+      setScore(prev => prev + 10 + timeBonus + streakBonus);
       setStreak(prev => prev + 1);
     } else {
       setStreak(0);
@@ -68,74 +70,78 @@ const SkillGame = ({ role, domainStack }) => {
       if (currentIdx < questions.length - 1) {
         setCurrentIdx(prev => prev + 1);
         setSelectedOption(null);
-        setTimeLeft(15);
+        setTimeLeft(12);
       } else {
         setGameState('result');
       }
-    }, 1200);
+    }, 1000);
   };
 
   return (
-    <div className="game-container-pro">
-      <div className="game-header-pro">
-        <div className="game-title">
-           <h2>{isTechnical ? 'Tech Sprint' : 'Leadership Sprint'}</h2>
-           <p className="game-subtitle">Speed & Accuracy Challenge</p>
+    <div className="elite-sprint-container">
+      <div className="sprint-header">
+        <div className="sprint-identity">
+           <h2>{isStrategic ? 'Strategic Sprint' : 'Technical Sprint'}</h2>
+           <span className="year-tag">2026 EDITION</span>
         </div>
         {gameState === 'playing' && (
-          <div className="game-meta">
-            <div className="stat-badge">🔥 {streak} Streak</div>
-            <div className="stat-badge">⭐ {score} Pts</div>
-            <div className={`timer-circle ${timeLeft < 5 ? 'urgent' : ''}`}>{timeLeft}</div>
+          <div className="sprint-stats">
+            <div className="stat-item"><span className="label">STREAK</span><span className="value streak">{streak}x</span></div>
+            <div className="stat-item"><span className="label">POINTS</span><span className="value">{score}</span></div>
+            <div className={`timer-ring ${timeLeft < 4 ? 'critical' : ''}`}>{timeLeft}</div>
           </div>
         )}
       </div>
 
       {gameState === 'start' && (
-        <div className="start-screen">
-          <div className="game-hero-icon">{isTechnical ? '⚡' : '🛡️'}</div>
-          <h3>Ready for the Sprint?</h3>
-          <p>5 questions. 15 seconds each. Bonus points for streaks.</p>
+        <div className="sprint-intro">
+          <div className="hero-visual">{isStrategic ? '🛡️' : '⚡'}</div>
+          <h3>Initiate {role} Evaluation</h3>
+          <p>5 Rapid scenarios. High precision required. Speed and accuracy generate multipliers.</p>
           {error && <p className="error-msg">{error}</p>}
-          <button className="primary-btn pulse" onClick={fetchQuestions}>Start Engine</button>
+          <button className="primary-btn elite-glow" onClick={fetchQuestions}>Start Evaluation</button>
         </div>
       )}
 
       {gameState === 'loading' && (
-        <div className="loading-screen">
-          <div className="loader-ring"></div>
-          <p>AI is generating custom challenges...</p>
+        <div className="sprint-loading">
+          <div className="binary-loader"></div>
+          <p>Compiling 2026 {role} Assessment Data...</p>
         </div>
       )}
 
       {gameState === 'playing' && questions.length > 0 && (
-        <div className="play-screen">
-          <div className="q-number">Question {currentIdx + 1} of {questions.length}</div>
-          <h3 className="game-question">{questions[currentIdx].question}</h3>
-          <div className="game-options">
-            {questions[currentIdx].options.map((opt, i) => (
-              <button 
-                key={i} 
-                className={`game-opt-btn ${selectedOption === i ? (i === questions[currentIdx].answer ? 'correct' : 'wrong') : ''} ${selectedOption !== null && i === questions[currentIdx].answer ? 'correct' : ''}`}
-                onClick={() => handleAnswer(i)}
-                disabled={selectedOption !== null}
-              >
-                {opt}
-              </button>
-            ))}
+        <div className="sprint-playboard">
+          <div className="question-zone">
+            <span className="q-index">QUESTION {currentIdx + 1}/5</span>
+            <h3 className="question-text">{questions[currentIdx].question}</h3>
+            <div className="options-matrix">
+              {questions[currentIdx].options.map((opt, i) => (
+                <button 
+                  key={i} 
+                  className={`opt-tile ${selectedOption === i ? (i === questions[currentIdx].answer ? 'correct' : 'wrong') : ''} ${selectedOption !== null && i === questions[currentIdx].answer ? 'reveal' : ''}`}
+                  onClick={() => handleAnswer(i)}
+                  disabled={selectedOption !== null}
+                >
+                  <span className="opt-letter">{String.fromCharCode(65 + i)}</span>
+                  <span className="opt-text">{opt}</span>
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       )}
 
       {gameState === 'result' && (
-        <div className="result-screen">
-          <div className="medal">{score > 30 ? '🥇' : '🥈'}</div>
-          <h3>Sprint Finished!</h3>
-          <div className="final-stats">
-            <div className="stat"><span>Final Score</span><strong>{score}</strong></div>
-            <div className="stat"><span>Max Streak</span><strong>{streak}</strong></div>
+        <div className="sprint-summary">
+          <div className="summary-card">
+            <div className="rank-medal">{score > 150 ? '🏆' : '🏅'}</div>
+            <h3>Evaluation Finalized</h3>
+            <div className="score-breakdown">
+              <div className="score-main"><span className="label">FINAL SCORE</span><span className="value">{score}</span></div>
+            </div>
+            <button className="primary-btn elite-glow" onClick={fetchQuestions}>New Evaluation</button>
           </div>
-          <button className="primary-btn" onClick={fetchQuestions}>Play Again</button>
         </div>
       )}
     </div>

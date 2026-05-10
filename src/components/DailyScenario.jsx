@@ -11,22 +11,30 @@ const DailyScenario = ({ role, domainStack }) => {
     setGameState('loading');
     setError(null);
     try {
-      const isManagement = ["TPM", "Scrum Master", "Delivery Manager"].includes(role);
-      const systemPrompt = `You are an expert technical interviewer. Generate a REAL-WORLD, latest (2024) interview scenario for a ${role} specializing in ${domainStack}. 
-      ${isManagement ? "CRITICAL: This is a management/leadership role. Do NOT ask about coding, caching, or low-level system design. Ask about roadmaps, stakeholder conflict, delivery risks, or agile bottlenecks." : "Focus on high-level architecture and technical trade-offs."}
+      const isStrategic = ["TPM", "Scrum Master", "Delivery Manager", "Business Analyst"].includes(role);
+      const systemPrompt = `You are an elite Hiring Partner at a global tech firm in 2026. 
+      Generate a real-world, high-stakes situational intelligence scenario for a ${role} focusing on ${domainStack}.
+      
+      UNIQUENESS GUIDELINES:
+      - NEVER say "I am your AI interviewer".
+      - Context is 2026: AI-augmented workflows, high-scale distributed systems, or complex remote leadership.
+      - If role is ${role} (Strategic/Leadership/Analytics), focus on: Stakeholder paralysis, requirements volatility, cross-team friction, or AI-driven delivery bottlenecks.
+      - If role is Technical, focus on: 2026-scale architectural drift, edge-case failure modes, or emerging stack trade-offs.
+      - NO generic questions like "Design a Caching Strategy" for management/BA roles.
+      
       Return ONLY a JSON object:
       {
-        "title": "A short catchy title",
-        "description": "A detailed 2-3 sentence challenge description based on a real company scenario.",
-        "solution": "A structured 2-3 sentence recommended elite approach."
+        "title": "A sharp, realistic title",
+        "description": "A complex 2-3 sentence situational challenge.",
+        "solution": "A structured 2-3 sentence 'Bar Raiser' level response."
       }`;
       
-      const raw = await callLLM(`Generate a 2024 interview challenge for ${role}`, systemPrompt);
+      const raw = await callLLM(`Generate a 2026 elite situational challenge for ${role} with focus on ${domainStack}`, systemPrompt);
       const data = safeParseJSON(raw);
       setCurrentChallenge(data);
       setGameState('idle');
     } catch (err) {
-      setError("AI is busy analyzing industry trends. Please refresh.");
+      setError("Unable to sync with industry data. Please refresh.");
       setGameState('idle');
     }
   };
@@ -38,7 +46,7 @@ const DailyScenario = ({ role, domainStack }) => {
   useEffect(() => {
     let timer;
     if (gameState === 'active' && timeLeft > 0) {
-      timer = setInterval(() => setTimeLeft((prev) => prev - 1), 1000);
+      timer = setInterval(() => setTimeLeft((prev) => setTimeLeft(prev - 1)), 1000);
     } else if (timeLeft === 0 && gameState === 'active') {
       setGameState('completed');
     }
@@ -53,58 +61,60 @@ const DailyScenario = ({ role, domainStack }) => {
 
   if (gameState === 'loading') {
     return (
-      <div className="daily-scenario-container">
+      <div className="daily-scenario-pro loading-state">
         <div className="loader-ring"></div>
-        <p>Analyzing latest 2024 trends for {role}...</p>
+        <p>Analyzing 2026 industry trends for {role}...</p>
       </div>
     );
   }
 
   return (
-    <div className="daily-scenario-container">
-      <div className="badge">2024 INDUSTRY CHALLENGE</div>
-      
+    <div className="daily-scenario-pro">
+      <div className="badge-row">
+        <span className="elite-badge">SITUATIONAL INTELLIGENCE • 2026</span>
+        {gameState === 'active' && <div className="timer-pill">STAY FOCUSED • {formatTime(timeLeft)}</div>}
+      </div>
+
       {currentChallenge && (
-        <div className="challenge-card-pro">
-          <div className="header-row">
-            <h2 className="challenge-title">{currentChallenge.title}</h2>
-            {gameState === 'active' && <div className="timer-pill">⏳ {formatTime(timeLeft)}</div>}
-          </div>
+        <div className="challenge-display">
+          <h2 className="display-title">{currentChallenge.title}</h2>
           
           {gameState === 'idle' && (
-            <div className="intro-view">
-              <p className="challenge-desc">{currentChallenge.description}</p>
-              <div className="action-row">
-                <button className="primary-btn" onClick={() => setGameState('active')}>Accept Mission</button>
-                <button className="reset-btn" onClick={fetchChallenge}>Skip Challenge</button>
+            <div className="view-intro">
+              <p className="scenario-text">{currentChallenge.description}</p>
+              <div className="button-group">
+                <button className="primary-btn elite" onClick={() => setGameState('active')}>
+                  Enter the Arena
+                </button>
+                <button className="ghost-btn" onClick={fetchChallenge}>Next Scenario</button>
               </div>
             </div>
           )}
 
           {gameState === 'active' && (
-            <div className="active-view">
-              <p className="challenge-desc">{currentChallenge.description}</p>
+            <div className="view-active">
+              <p className="scenario-text subtle">{currentChallenge.description}</p>
               <textarea 
-                className="challenge-textarea-pro" 
-                placeholder="Draft your solution... (Trade-offs, Risks, Strategy)"
+                className="input-textarea-premium" 
+                placeholder="Draft your executive response..."
               ></textarea>
-              <button className="primary-btn" onClick={() => setGameState('completed')}>Finalize Solution</button>
+              <button className="primary-btn elite" onClick={() => setGameState('completed')}>Finalize Solution</button>
             </div>
           )}
 
           {gameState === 'completed' && (
-            <div className="completed-view">
-              <div className="success-banner">✓ CHALLENGE COMPLETED</div>
-              <div className="solution-section">
-                <h4>Elite Solution Strategy:</h4>
+            <div className="view-completed">
+              <div className="feedback-card">
+                <div className="status-indicator">EVALUATION COMPLETE</div>
+                <h4>Hiring Partner's Insight:</h4>
                 <p>{currentChallenge.solution}</p>
               </div>
-              <button className="primary-btn" onClick={fetchChallenge}>Get New Mission</button>
+              <button className="primary-btn elite" onClick={fetchChallenge}>Next Challenge</button>
             </div>
           )}
         </div>
       )}
-      {error && <p className="error-msg">{error}</p>}
+      {error && <p className="error-text">{error}</p>}
     </div>
   );
 };

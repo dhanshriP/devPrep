@@ -11,34 +11,40 @@ const MockInterviewScreen = ({ interviewSettings, onEndInterview }) => {
   const messagesEndRef = useRef(null);
 
   const isTechnical = ["SDE", "Principal Engineer", "EM"].includes(interviewSettings.role);
+  const isBA = interviewSettings.role === "Business Analyst";
 
-  // Initial prompt to start the interview
+  // Initial prompt to start the session as a Hiring Partner in 2026
   useEffect(() => {
-    const startInterview = async () => {
+    const startSession = async () => {
       setIsAiThinking(true);
       try {
-        const systemPrompt = `You are a professional interviewer from a ${interviewSettings.companyStyle} company. 
-        You are interviewing a ${interviewSettings.level} candidate for a ${interviewSettings.role} position.
-        The candidate's focus area is ${interviewSettings.domainStack}.
+        const systemPrompt = `You are an elite Hiring Partner at a global tech leader in 2026. 
+        You are conducting a high-stakes assessment for a ${interviewSettings.level} ${interviewSettings.role} candidate specializing in ${interviewSettings.domainStack}.
         
-        IMPORTANT: 
-        1. If the role is non-technical (TPM, SM, Delivery Manager), do NOT ask deep coding or system design questions like caching. 
-        2. Focus on role-specific challenges (e.g., Stakeholder management for TPM, Agile processes for SM).
-        3. Be conversational. Start by introducing yourself and asking a specific, recent real-world interview question relevant to their profile.
-        4. Keep your responses concise and professional.`;
+        UNIQUENESS & TONE:
+        - NEVER say "I am an AI" or "I am your AI interviewer".
+        - Act as a real person. Be direct, professional, and slightly skeptical.
+        - In 2026, the bar is extremely high. Move past basics immediately.
+        
+        ROLE-SPECIFIC GUARDRAILS:
+        - For TPM/Scrum Master/Delivery Manager/Business Analyst: Focus on 2026 challenges—AI-augmented delivery risks, complex stakeholder alignment, or requirements volatility in volatile markets. 
+        - NEVER ask these roles about coding, caching, or low-level technical implementation.
+        - For SDE/Principal: Focus on 2026-scale architecture, extreme scalability, and emerging tech trade-offs.
+        
+        Your Goal: Open the session with a sharp, context-rich situational question that probes their experience in ${interviewSettings.domainStack}.`;
 
-        const greeting = await callLLM(`Start the interview for a ${interviewSettings.level} ${interviewSettings.role}`, systemPrompt);
+        const greeting = await callLLM(`Begin the evaluation for a ${interviewSettings.role}`, systemPrompt);
         setMessages([{ sender: 'ai', text: greeting }]);
         setTurns(1);
       } catch (err) {
-        setMessages([{ sender: 'ai', text: "I'm having trouble connecting. Let's try to start again." }]);
+        setMessages([{ sender: 'ai', text: "Connection error. Let's restart the link." }]);
       } finally {
         setIsAiThinking(false);
       }
     };
 
     if (messages.length === 0) {
-      startInterview();
+      startSession();
     }
   }, [interviewSettings, messages.length]);
 
@@ -56,32 +62,29 @@ const MockInterviewScreen = ({ interviewSettings, onEndInterview }) => {
     setIsAiThinking(true);
 
     try {
-      const history = messages.map(m => `${m.sender === 'ai' ? 'Interviewer' : 'Candidate'}: ${m.text}`).join('\n');
-      const systemPrompt = `You are a professional interviewer for a ${interviewSettings.role} role at ${interviewSettings.companyStyle}. 
-      Current interview focus: ${interviewSettings.domainStack} at ${interviewSettings.level} level.
+      const history = messages.map(m => `${m.sender === 'ai' ? 'Hiring Partner' : 'Candidate'}: ${m.text}`).join('\n');
+      const systemPrompt = `You are an elite Hiring Partner in 2026. Evaluation for: ${interviewSettings.role} (${interviewSettings.level}).
+      Context: ${interviewSettings.domainStack}.
       
-      CRITICAL ROLE GUIDELINES:
-      - For TPM/SM/DM: Ask about roadmaps, blockers, metrics, or team dynamics. NO CACHING/DATABASE questions.
-      - For SDE/Principal: Ask about architecture, trade-offs, and recent high-scale problems.
+      CORE INSTRUCTIONS:
+      1. Analyze the candidate's response deeply.
+      2. If the response is generic, PUSH BACK. Challenge their assumptions or ask for specific 2026-scale metrics/trade-offs.
+      3. For TPM/BA/Management: Focus on outcomes, risks, requirements accuracy, and leadership. NO TECH IMPLEMENTATION.
+      4. If they give a strong answer, pivot to a more complex, unforeseen problem in that area.
+      5. Maintain the persona. Keep it conversational but intense.
       
-      Interview Progress: ${turns}/${MAX_CONVERSATION_TURNS} turns.
-      
-      Your Goal: 
-      1. Analyze the candidate's response.
-      2. PUSH BACK or ask a challenging follow-up if their answer is generic.
-      3. If they are doing well, move to a deeper technical or situational question.
-      4. Keep the tone professional.`;
+      Current Progress: ${turns}/${MAX_CONVERSATION_TURNS} exchanges.`;
 
-      const aiResponse = await callLLM(`Candidate Answer: ${input}\n\nInterview History:\n${history}`, systemPrompt);
+      const aiResponse = await callLLM(`Candidate Response: ${input}\n\nSession History:\n${history}`, systemPrompt);
       
       setMessages(prev => [...prev, { sender: 'ai', text: aiResponse }]);
       setTurns(prev => prev + 1);
 
       if (turns + 1 >= MAX_CONVERSATION_TURNS) {
-        setTimeout(() => onEndInterview(), 3000);
+        setTimeout(() => onEndInterview(), 4000);
       }
     } catch (err) {
-      setMessages(prev => [...prev, { sender: 'ai', text: "Sorry, I lost my train of thought. Can you repeat that?" }]);
+      setMessages(prev => [...prev, { sender: 'ai', text: "The link is unstable. Can you summarize your last point?" }]);
     } finally {
       setIsAiThinking(false);
     }
@@ -91,30 +94,29 @@ const MockInterviewScreen = ({ interviewSettings, onEndInterview }) => {
     <div className="mock-interview-screen-pro">
       <div className="interview-header">
         <div className="session-info">
-          <span className="live-indicator">● LIVE SESSION</span>
-          <h2>{interviewSettings.role} Interview</h2>
+          <div className="live-pulse"></div>
+          <span className="live-label">2026 EXECUTIVE EVALUATION</span>
         </div>
-        <div className="progress-pills">
-          <span className="turn-count">Exchange {turns}/{MAX_CONVERSATION_TURNS}</span>
-          <button className="end-session-btn" onClick={onEndInterview}>End Session</button>
+        <div className="header-meta">
+          <span className="exchange-tag">Level: {interviewSettings.level}</span>
+          <button className="terminate-btn" onClick={onEndInterview}>Terminate Session</button>
         </div>
       </div>
 
       <div className="chat-window">
         <div className="messages-list">
           {messages.map((msg, idx) => (
-            <div key={idx} className={`chat-bubble-wrapper ${msg.sender}`}>
-              <div className="avatar">{msg.sender === 'ai' ? '🤖' : '👤'}</div>
+            <div key={idx} className={`chat-wrapper ${msg.sender}`}>
+              <div className="sender-name">{msg.sender === 'ai' ? 'HIRING PARTNER' : 'YOU'}</div>
               <div className="chat-bubble">
-                {msg.text}
+                <p>{msg.text}</p>
               </div>
             </div>
           ))}
           {isAiThinking && (
-            <div className="chat-bubble-wrapper ai">
-              <div className="avatar">🤖</div>
+            <div className="chat-wrapper ai">
               <div className="chat-bubble thinking">
-                <span className="dot"></span><span className="dot"></span><span className="dot"></span>
+                <div className="typing-loader"><span></span><span></span><span></span></div>
               </div>
             </div>
           )}
@@ -126,11 +128,11 @@ const MockInterviewScreen = ({ interviewSettings, onEndInterview }) => {
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder={turns >= MAX_CONVERSATION_TURNS ? "Interview concluding..." : "Share your response..."}
+            placeholder={turns >= MAX_CONVERSATION_TURNS ? "Evaluation concluding..." : "Provide your perspective..."}
             disabled={isAiThinking || turns >= MAX_CONVERSATION_TURNS}
           />
-          <button type="submit" className="send-btn" disabled={!input.trim() || isAiThinking}>
-            {isAiThinking ? '...' : 'Send'}
+          <button type="submit" className="send-btn-pro" disabled={!input.trim() || isAiThinking}>
+            {isAiThinking ? '...' : '→'}
           </button>
         </form>
       </div>
