@@ -68,13 +68,13 @@ const SetupScreen = ({ onSetupComplete }) => {
   };
 
   return (
-    <div className="setup-screen">
+    <div className="setup-screen fade-in">
       <div className="setup-header">
         <h1>DevPrep.ai</h1>
         <p className="setup-subtitle">Elite Career Intelligence Suite</p>
       </div>
 
-      <div className="setup-card">
+      <div className="setup-card glass-morph">
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label>YOUR ROLE</label>
@@ -103,12 +103,12 @@ const SetupScreen = ({ onSetupComplete }) => {
           <div className="form-group">
             <label>TARGET COMPANY CULTURE</label>
             <select value={companyStyle} onChange={(e) => setCompanyStyle(e.target.value)}>
-              <option value="">Select style</option>
+              <option value="">Select target culture</option>
               {companyStyles.map(cs => <option key={cs} value={cs}>{cs}</option>)}
             </select>
           </div>
           
-          <button type="submit" className="primary-btn wide-btn">
+          <button type="submit" className="primary-btn wide-btn elite-glow">
             Initiate Evaluation 🚀
           </button>
         </form>

@@ -17,36 +17,37 @@ const DailyScenario = ({ role, domainStack }) => {
       const randomSeed = Math.floor(Math.random() * 1000000);
       const isStrategic = ["TPM", "Scrum Master", "Delivery Manager", "Business Analyst"].includes(role);
       
-      const userPrompt = `System Context ID: ${randomSeed}. Generate a 2026 elite career scenario for a ${role} specializing in ${domainStack}.`;
-      const systemPrompt = `You are an elite Hiring Partner at a global tech firm in 2026. 
+      const userPrompt = `System Context ID: ${randomSeed}. Generate an elite career scenario for a ${role} specializing in ${domainStack}.`;
+      const systemPrompt = `You are a Senior Hiring Partner at a global tech firm. 
       Generate a UNIQUE, high-stakes situational intelligence scenario for a ${role} focusing on ${domainStack}. 
+      Seed ID for randomness: ${randomSeed}.
       
       UNIQUENESS GUIDELINES:
-      - NEVER say "I am your AI interviewer".
-      - NO generic questions. Focus on 2026 specific challenges: AI-native team friction, extreme scale reliability, or strategic requirements drift.
-      - If role is Strategic (${role}), focus on leadership/outcomes. NO technical design like caching.
+      - NEVER say "I am an AI". Act as an elite hiring professional.
+      - Scenarios should involve modern challenges: AI-augmented teams, large-scale systems, or high-stakes stakeholder negotiations.
+      - If role is Strategic (${role}), focus on leadership, outcomes, and complex trade-offs. NO coding/caching questions.
       
       Return ONLY a raw JSON object with NO other text:
       {
-        "title": "A sharp 2026 title",
-        "description": "A complex 2-3 sentence situational problem.",
-        "solution": "A structured 2-3 sentence executive-level strategy."
+        "title": "A sharp situational title",
+        "description": "A complex 2-3 sentence problem requiring high-level judgment.",
+        "solution": "A structured 2-3 sentence elite hiring committee approach."
       }`;
       
       const raw = await callLLM(userPrompt, systemPrompt);
       const data = safeParseJSON(raw);
       
-      if (data && data.title && data.description && data.solution) {
+      if (data && data.title && data.description) {
         setCurrentChallenge(data);
         setGameState('idle');
         setTimeLeft(180);
         setUserDraft('');
       } else {
-        throw new Error("Data parsing failed");
+        throw new Error("Data sync failure.");
       }
     } catch (err) {
       console.error("Scenario Fetch Error:", err);
-      setError("Unable to sync with industry data. Industry stream is unstable. Please click 'Force Sync' to reconnect.");
+      setError("Unable to sync with latest industry data. Please click 'Force Sync' to reconnect.");
       setGameState('idle');
     }
   }, [role, domainStack]);
@@ -75,21 +76,21 @@ const DailyScenario = ({ role, domainStack }) => {
     return (
       <div className="daily-scenario-container loading-state">
         <div className="binary-loader"></div>
-        <p className="loading-message">Synthesizing 2026 Market Dynamics...</p>
+        <p className="loading-message">Synthesizing Market Dynamics...</p>
       </div>
     );
   }
 
   return (
-    <div className="daily-scenario-pro glass-card">
+    <div className="daily-scenario-pro glass-container">
       <div className="scenario-meta">
-        <span className="elite-badge">SITUATIONAL INTELLIGENCE • 2026</span>
-        {gameState === 'active' && <div className="timer-pill-pro critical-pulse">⏳ {formatTime(timeLeft)}</div>}
+        <span className="badge-elite">SITUATIONAL INTELLIGENCE</span>
+        {gameState === 'active' && <div className="timer-pill critical-pulse">⏳ {formatTime(timeLeft)}</div>}
       </div>
 
       {error ? (
-        <div className="error-card-v2">
-          <p className="error-text-pro">{error}</p>
+        <div className="error-card">
+          <p>{error}</p>
           <button className="primary-btn elite-glow" onClick={fetchChallenge}>🔄 Force Sync</button>
         </div>
       ) : currentChallenge && (
@@ -97,44 +98,44 @@ const DailyScenario = ({ role, domainStack }) => {
           <h2 className="display-title-elite">{currentChallenge.title}</h2>
           
           {gameState === 'idle' && (
-            <div className="view-pane-pro fade-in">
-              <p className="scenario-text-pro">{currentChallenge.description}</p>
-              <div className="action-row-pro">
+            <div className="view-pane-elite fade-in">
+              <p className="scenario-text">{currentChallenge.description}</p>
+              <div className="action-row-elite">
                 <button className="primary-btn elite-glow" onClick={() => setGameState('active')}>
                   Accept Mission
                 </button>
-                <button className="ghost-btn-sync" onClick={fetchChallenge}>
-                   <span>🔄</span> Skip
+                <button className="ghost-btn-elite" onClick={fetchChallenge}>
+                   <span>🔄</span> Skip Scenario
                 </button>
               </div>
             </div>
           )}
 
           {gameState === 'active' && (
-            <div className="view-pane-pro fade-in">
-              <p className="scenario-text-pro dimmed">{currentChallenge.description}</p>
+            <div className="view-pane-elite fade-in">
+              <p className="scenario-text subtle">{currentChallenge.description}</p>
               <textarea 
                 className="input-textarea-executive" 
                 value={userDraft}
                 onChange={(e) => setUserDraft(e.target.value)}
-                placeholder="Draft your executive strategy here..."
+                placeholder="Draft your executive solution..."
                 autoFocus
               ></textarea>
-              <div className="action-row-pro">
+              <div className="action-row-elite">
                 <button className="primary-btn elite-glow" onClick={() => setGameState('completed')}>Finalize Solution</button>
-                <button className="ghost-btn-sync" onClick={() => setGameState('idle')}>Cancel</button>
+                <button className="ghost-btn-elite" onClick={() => setGameState('idle')}>Back</button>
               </div>
             </div>
           )}
 
           {gameState === 'completed' && (
-            <div className="view-pane-pro fade-in">
+            <div className="view-pane-elite fade-in">
               <div className="feedback-card-elite">
-                <div className="status-label-pro">✓ EVALUATION COMPLETE</div>
-                <h4 className="insight-label-pro">Hiring Partner's Core Insight:</h4>
-                <p className="solution-text-pro">{currentChallenge.solution}</p>
+                <div className="status-label">✓ EVALUATION COMPLETE</div>
+                <h4 className="insight-header">Hiring Partner's Core Insight:</h4>
+                <p className="insight-text">{currentChallenge.solution}</p>
               </div>
-              <div className="centered-action-pro">
+              <div className="centered-action">
                 <button className="primary-btn elite-glow" onClick={fetchChallenge}>Next Scenario</button>
               </div>
             </div>
