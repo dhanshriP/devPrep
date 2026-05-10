@@ -63,7 +63,7 @@ const SetupScreen = ({ onSetupComplete }) => {
     if (role && level && domainStack && companyStyle) {
       onSetupComplete({ role, level, domainStack, companyStyle });
     } else {
-      alert("Please fill all fields to begin your 2026 assessment.");
+      alert("Please fill all fields to begin your evaluation.");
     }
   };
 
@@ -71,7 +71,7 @@ const SetupScreen = ({ onSetupComplete }) => {
     <div className="setup-screen">
       <div className="setup-header">
         <h1>DevPrep.ai</h1>
-        <p className="setup-subtitle">Elite 2026 Career Intelligence Suite</p>
+        <p className="setup-subtitle">Elite Career Intelligence Suite</p>
       </div>
 
       <div className="setup-card">
@@ -103,13 +103,13 @@ const SetupScreen = ({ onSetupComplete }) => {
           <div className="form-group">
             <label>TARGET COMPANY CULTURE</label>
             <select value={companyStyle} onChange={(e) => setCompanyStyle(e.target.value)}>
-              <option value="">Select target culture</option>
+              <option value="">Select style</option>
               {companyStyles.map(cs => <option key={cs} value={cs}>{cs}</option>)}
             </select>
           </div>
           
           <button type="submit" className="primary-btn wide-btn">
-            Initiate 2026 Evaluation 🚀
+            Initiate Evaluation 🚀
           </button>
         </form>
       </div>

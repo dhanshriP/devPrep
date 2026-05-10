@@ -31,17 +31,14 @@ export async function callLLM(userPrompt, systemPrompt = '') {
 
 /**
  * Safely parses JSON from LLM output.
- * Cleanly extracts JSON even if the AI surrounds it with prose or markdown.
+ * Uses a robust regex/substring approach to find the JSON block even if the AI adds prose.
  */
 export function safeParseJSON(raw) {
   if (!raw) throw new Error("No data received from AI");
   
   let clean = raw.trim();
   
-  // 1. Remove markdown code blocks (```json ... ```)
-  clean = clean.replace(/```json\s?/g, '').replace(/```/g, '').trim();
-  
-  // 2. Extract first valid JSON block
+  // Try to find the first '{' or '[' and last '}' or ']'
   const startBrace = clean.indexOf('{');
   const startBracket = clean.indexOf('[');
   let startIndex = -1;
@@ -61,8 +58,8 @@ export function safeParseJSON(raw) {
       const jsonStr = clean.substring(startIndex, lastIndex + 1);
       try {
         return JSON.parse(jsonStr);
-      } catch (e) {
-        console.error("JSON Parse Error on extracted string:", jsonStr);
+      } catch (parseErr) {
+        console.error("Partial JSON Parse Failure. Extracted:", jsonStr);
       }
     }
   }
@@ -72,6 +69,6 @@ export function safeParseJSON(raw) {
     return JSON.parse(clean);
   } catch (err) {
     console.error("Final JSON Parse Failure. Raw content:", raw);
-    throw new Error("AI response format was invalid.");
+    throw new Error("AI response format was invalid. Please try another session.");
   }
 }

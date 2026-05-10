@@ -4,6 +4,7 @@ import MockInterviewScreen from './components/MockInterviewScreen';
 import ScorecardScreen from './components/ScorecardScreen';
 import DailyScenario from './components/DailyScenario';
 import SkillGame from './components/SkillGame';
+import LatestQuestions from './components/LatestQuestions';
 import './App.css';
 
 const App = () => {
@@ -34,10 +35,10 @@ const App = () => {
 
   const dummyScorecard = {
     clarity: "Strong executive presence. You moved beyond tactical implementation to business outcomes.",
-    depth: "Demonstrated 2026-scale architectural maturity. Excellent risk-mitigation strategy.",
-    structure: "Methodical and framework-driven. Very little fluff in the responses.",
-    redFlags: "None. You are currently trending in the top 5% of candidates.",
-    weaknessTrackerUpdate: "Consider deepening cross-region AI orchestration trade-offs."
+    depth: "Demonstrated profound architectural maturity. Excellent risk-mitigation strategy.",
+    structure: "Methodical and framework-driven. Response was concise and high-signal.",
+    redFlags: "None. You are currently trending in the top 5% of industry candidates.",
+    weaknessTrackerUpdate: "Consider deepening cross-region orchestration trade-offs."
   };
 
   return (
@@ -46,7 +47,7 @@ const App = () => {
         <SetupScreen onSetupComplete={handleSetupComplete} />
       ) : (
         <div className="dashboard-grid">
-          <aside className="sidebar-elite">
+          <aside className="sidebar-pro">
             <div className="sidebar-brand">
               <h1>DevPrep<span>.ai</span></h1>
             </div>
@@ -73,6 +74,13 @@ const App = () => {
                 <span className="nav-text">Evaluation</span>
               </button>
               <button 
+                className={`nav-link ${activeTab === 'latest' ? 'active' : ''}`}
+                onClick={() => setActiveTab('latest')}
+              >
+                <span className="nav-icon">🔥</span> 
+                <span className="nav-text">Market Trends</span>
+              </button>
+              <button 
                 className={`nav-link ${activeTab === 'daily' ? 'active' : ''}`}
                 onClick={() => setActiveTab('daily')}
               >
@@ -90,8 +98,8 @@ const App = () => {
 
             <div className="sidebar-bottom">
               <button className="change-profile-btn" onClick={handleResetSettings}>
-                <span className="btn-icon">🔄</span>
-                <span>Reset Assessment</span>
+                <span className="btn-icon">👤</span>
+                <span>Change Profile</span>
               </button>
             </div>
           </aside>
@@ -102,11 +110,11 @@ const App = () => {
                 <div className="module-view">
                   {interviewState === 'idle' && (
                     <div className="welcome-glass-card">
-                      <div className="card-decorator">READY</div>
-                      <h2>Executive Evaluation</h2>
-                      <p>A conversational session calibrated for <strong>{interviewSettings?.domainStack}</strong>. No generic Q&A.</p>
+                      <div className="card-badge">STATUS: READY</div>
+                      <h2>Elite Evaluation</h2>
+                      <p>Start a conversational session tailored for <strong>{interviewSettings?.domainStack}</strong>. Move beyond the basics.</p>
                       <button className="primary-action-btn" onClick={() => setInterviewState('ongoing')}>
-                        Begin Evaluation 🚀
+                        Initiate Evaluation 🚀
                       </button>
                     </div>
                   )}
@@ -124,6 +132,13 @@ const App = () => {
                     />
                   )}
                 </div>
+              )}
+
+              {activeTab === 'latest' && (
+                <LatestQuestions 
+                  role={interviewSettings?.role} 
+                  domainStack={interviewSettings?.domainStack} 
+                />
               )}
 
               {activeTab === 'daily' && (
