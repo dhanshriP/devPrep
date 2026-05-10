@@ -7,11 +7,13 @@ import SkillGame from './components/SkillGame';
 import './App.css';
 
 const App = () => {
-  const [currentScreen, setCurrentScreen] = useState('setup'); // 'setup' or 'dashboard'
-  const [activeTab, setActiveTab] = useState('interview'); // 'interview', 'daily', 'game'
+  const [currentScreen, setCurrentScreen] = useState('setup'); 
+  const [activeTab, setActiveTab] = useState('interview'); 
   const [interviewSettings, setInterviewSettings] = useState(null);
   const [currentScorecard, setCurrentScorecard] = useState(null);
-  const [interviewState, setInterviewState] = useState('idle'); // 'idle', 'ongoing', 'result'
+  const [interviewState, setInterviewState] = useState('idle');
+
+  const isTechnicalRole = (role) => ["SDE", "Principal Engineer", "EM"].includes(role);
 
   const handleSetupComplete = (settings) => {
     setInterviewSettings(settings);
@@ -35,7 +37,7 @@ const App = () => {
     depth: "Demonstrated good surface-level understanding, but struggled when probed for deeper technical details.",
     structure: "Responses were generally well-structured.",
     redFlags: "No major red flags identified.",
-    weaknessTrackerUpdate: "Added 'Scalability' to weakness tracker."
+    weaknessTrackerUpdate: "Added 'Strategic Planning' to weakness tracker."
   };
 
   return (
@@ -52,7 +54,10 @@ const App = () => {
             <div className="profile-card">
               <h3>{interviewSettings?.role}</h3>
               <p>{interviewSettings?.level}</p>
-              <p className="tech-tag">{interviewSettings?.domainStack}</p>
+              <div className="tech-tag">
+                {isTechnicalRole(interviewSettings?.role) ? "Stack: " : "Focus: "}
+                {interviewSettings?.domainStack}
+              </div>
             </div>
 
             <nav className="nav-links">
@@ -72,13 +77,14 @@ const App = () => {
                 className={`nav-btn ${activeTab === 'game' ? 'active' : ''}`}
                 onClick={() => setActiveTab('game')}
               >
-                <span className="icon">⚡</span> Tech Sprint
+                <span className="icon">⚡</span> 
+                {isTechnicalRole(interviewSettings?.role) ? "Tech Sprint" : "Management Sprint"}
               </button>
             </nav>
 
             <div className="sidebar-footer">
               <button className="reset-btn" onClick={handleResetSettings}>
-                Change Profile
+                <span>🔄</span> Change Profile
               </button>
             </div>
           </aside>
@@ -92,7 +98,7 @@ const App = () => {
                       <h2>Mock Interview</h2>
                       <p>Start a conversational session for <strong>{interviewSettings?.domainStack}</strong>. AI will push your limits.</p>
                       <button className="primary-btn" onClick={() => setInterviewState('ongoing')}>
-                        Launch Session
+                        Launch Session 🚀
                       </button>
                     </div>
                   )}
