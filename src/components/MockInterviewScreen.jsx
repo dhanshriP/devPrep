@@ -1,117 +1,139 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { callLLM } from '../api';
 
-const MAX_CONVERSATION_TURNS = 6; // AI + User exchanges
+const MAX_CONVERSATION_TURNS = 7;
 
 const MockInterviewScreen = ({ interviewSettings, onEndInterview }) => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
-  const [conversationTurns, setConversationTurns] = useState(0);
+  const [isAiThinking, setIsAiThinking] = useState(false);
+  const [turns, setTurns] = useState(0);
   const messagesEndRef = useRef(null);
 
-  // Simulate initial AI greeting and first question
+  const isTechnical = ["SDE", "Principal Engineer", "EM"].includes(interviewSettings.role);
+
+  // Initial prompt to start the interview
   useEffect(() => {
-    if (interviewSettings && messages.length === 0) {
-      setMessages([
-        {
-          sender: 'ai',
-          text: `Hello! I'm your AI interviewer. Today we'll be discussing ${interviewSettings.domainStack} for a ${interviewSettings.level} ${interviewSettings.role} role at a ${interviewSettings.companyStyle} company.`
-        },
-        {
-          sender: 'ai',
-          text: 'Let\'s start with your experience. Could you tell me about a challenging project you\'ve worked on in this domain?'
-        }
-      ]);
-      setConversationTurns(1); // Initial question is the first turn
+    const startInterview = async () => {
+      setIsAiThinking(true);
+      try {
+        const systemPrompt = `You are a professional interviewer from a ${interviewSettings.companyStyle} company. 
+        You are interviewing a ${interviewSettings.level} candidate for a ${interviewSettings.role} position.
+        The candidate's focus area is ${interviewSettings.domainStack}.
+        
+        IMPORTANT: 
+        1. If the role is non-technical (TPM, SM, Delivery Manager), do NOT ask deep coding or system design questions like caching. 
+        2. Focus on role-specific challenges (e.g., Stakeholder management for TPM, Agile processes for SM).
+        3. Be conversational. Start by introducing yourself and asking a specific, recent real-world interview question relevant to their profile.
+        4. Keep your responses concise and professional.`;
+
+        const greeting = await callLLM(`Start the interview for a ${interviewSettings.level} ${interviewSettings.role}`, systemPrompt);
+        setMessages([{ sender: 'ai', text: greeting }]);
+        setTurns(1);
+      } catch (err) {
+        setMessages([{ sender: 'ai', text: "I'm having trouble connecting. Let's try to start again." }]);
+      } finally {
+        setIsAiThinking(false);
+      }
+    };
+
+    if (messages.length === 0) {
+      startInterview();
     }
   }, [interviewSettings, messages.length]);
 
-  // Scroll to the bottom of messages on new message
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const getSimulatedAIResponse = () => {
-    const responses = [
-      'That\'s interesting. Can you elaborate on the specific technical challenges you faced in that project and how you overcame them?',
-      'Could you dive deeper into the design choices you made and the trade-offs involved?',
-      'How would you have approached that problem differently if you had more resources or a different timeline?',
-      'What was your role in resolving that issue, and what was the impact on the project?',
-      'Suppose you encountered a similar problem with a stricter performance requirement. How would your solution change?',
-      'Let\'s consider scalability. How would your proposed solution handle a significant increase in load or data?',
-      'From an architectural perspective, where does this solution fit into a larger system, and what are its dependencies?',
-      'That sounds complex. Can you walk me through the debugging steps or diagnostic process you used?',
-      'How do you ensure the quality and reliability of your code in such a scenario?',
-      'What kind of metrics or monitoring would you put in place to track the success or health of this solution?'
-    ];
-    return responses[Math.floor(Math.random() * responses.length)];
-  };
-
-  const handleSendMessage = (e) => {
+  const handleSendMessage = async (e) => {
     e.preventDefault();
-    if (input.trim() && conversationTurns < MAX_CONVERSATION_TURNS) {
-      const newUserMessage = { sender: 'user', text: input.trim() };
-      setMessages(prevMessages => [...prevMessages, newUserMessage]);
-      setInput('');
+    if (!input.trim() || isAiThinking || turns >= MAX_CONVERSATION_TURNS) return;
 
-      // Increment turns for the user's message
-      const nextTurns = conversationTurns + 1;
-      setConversationTurns(nextTurns);
+    const userMessage = { sender: 'user', text: input.trim() };
+    setMessages(prev => [...prev, userMessage]);
+    setInput('');
+    setIsAiThinking(true);
 
-      if (nextTurns >= MAX_CONVERSATION_TURNS) {
-        // If max turns reached after user's message, end interview
-        setTimeout(() => {
-          onEndInterview();
-        }, 1500); // Give a moment before ending
-      } else {
-        // Simulate AI response after a short delay
-        setTimeout(() => {
-          setMessages(prevMessages => [
-            ...prevMessages,
-            { sender: 'ai', text: getSimulatedAIResponse() }
-          ]);
-        }, 1000);
+    try {
+      const history = messages.map(m => `${m.sender === 'ai' ? 'Interviewer' : 'Candidate'}: ${m.text}`).join('\n');
+      const systemPrompt = `You are a professional interviewer for a ${interviewSettings.role} role at ${interviewSettings.companyStyle}. 
+      Current interview focus: ${interviewSettings.domainStack} at ${interviewSettings.level} level.
+      
+      CRITICAL ROLE GUIDELINES:
+      - For TPM/SM/DM: Ask about roadmaps, blockers, metrics, or team dynamics. NO CACHING/DATABASE questions.
+      - For SDE/Principal: Ask about architecture, trade-offs, and recent high-scale problems.
+      
+      Interview Progress: ${turns}/${MAX_CONVERSATION_TURNS} turns.
+      
+      Your Goal: 
+      1. Analyze the candidate's response.
+      2. PUSH BACK or ask a challenging follow-up if their answer is generic.
+      3. If they are doing well, move to a deeper technical or situational question.
+      4. Keep the tone professional.`;
+
+      const aiResponse = await callLLM(`Candidate Answer: ${input}\n\nInterview History:\n${history}`, systemPrompt);
+      
+      setMessages(prev => [...prev, { sender: 'ai', text: aiResponse }]);
+      setTurns(prev => prev + 1);
+
+      if (turns + 1 >= MAX_CONVERSATION_TURNS) {
+        setTimeout(() => onEndInterview(), 3000);
       }
+    } catch (err) {
+      setMessages(prev => [...prev, { sender: 'ai', text: "Sorry, I lost my train of thought. Can you repeat that?" }]);
+    } finally {
+      setIsAiThinking(false);
     }
   };
 
-  // Display a message when max turns are reached and interview is ending
-  const isInterviewEnding = conversationTurns >= MAX_CONVERSATION_TURNS && messages[messages.length - 1]?.sender !== 'ai';
-
   return (
-    <div className="mock-interview-screen">
-      <h2>Mock Interview Session</h2>
-      <p>Role: {interviewSettings.role} | Level: {interviewSettings.level} | Domain: {interviewSettings.domainStack}</p>
-      <p>Turns remaining: {MAX_CONVERSATION_TURNS - conversationTurns}</p>
-      
-      <div className="chat-container">
-        <div className="messages-display">
-          {messages.map((msg, index) => (
-            <div key={index} className={`message ${msg.sender}`}>
-              <strong>{msg.sender === 'user' ? 'You' : 'AI'}:</strong> {msg.text}
+    <div className="mock-interview-screen-pro">
+      <div className="interview-header">
+        <div className="session-info">
+          <span className="live-indicator">● LIVE SESSION</span>
+          <h2>{interviewSettings.role} Interview</h2>
+        </div>
+        <div className="progress-pills">
+          <span className="turn-count">Exchange {turns}/{MAX_CONVERSATION_TURNS}</span>
+          <button className="end-session-btn" onClick={onEndInterview}>End Session</button>
+        </div>
+      </div>
+
+      <div className="chat-window">
+        <div className="messages-list">
+          {messages.map((msg, idx) => (
+            <div key={idx} className={`chat-bubble-wrapper ${msg.sender}`}>
+              <div className="avatar">{msg.sender === 'ai' ? '🤖' : '👤'}</div>
+              <div className="chat-bubble">
+                {msg.text}
+              </div>
             </div>
           ))}
-          {isInterviewEnding && (
-            <div className="message ai">
-              <strong>AI:</strong> Thank you for your responses. This concludes our interview session.
+          {isAiThinking && (
+            <div className="chat-bubble-wrapper ai">
+              <div className="avatar">🤖</div>
+              <div className="chat-bubble thinking">
+                <span className="dot"></span><span className="dot"></span><span className="dot"></span>
+              </div>
             </div>
           )}
           <div ref={messagesEndRef} />
         </div>
-        <form onSubmit={handleSendMessage} className="message-input-form">
+
+        <form className="chat-input-area" onSubmit={handleSendMessage}>
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder={isInterviewEnding ? "Interview ended" : "Type your answer..."}
-            disabled={isInterviewEnding}
+            placeholder={turns >= MAX_CONVERSATION_TURNS ? "Interview concluding..." : "Share your response..."}
+            disabled={isAiThinking || turns >= MAX_CONVERSATION_TURNS}
           />
-          <button type="submit" disabled={isInterviewEnding}>Send</button>
+          <button type="submit" className="send-btn" disabled={!input.trim() || isAiThinking}>
+            {isAiThinking ? '...' : 'Send'}
+          </button>
         </form>
       </div>
-
-      <button onClick={onEndInterview} className="end-interview-button" disabled={isInterviewEnding}>
-        End Interview Now
-      </button>
     </div>
   );
 };

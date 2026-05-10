@@ -33,11 +33,11 @@ const App = () => {
   };
 
   const dummyScorecard = {
-    clarity: "Good clarity in explaining concepts, though some explanations lacked concrete examples.",
-    depth: "Demonstrated good surface-level understanding, but struggled when probed for deeper technical details.",
-    structure: "Responses were generally well-structured.",
-    redFlags: "No major red flags identified.",
-    weaknessTrackerUpdate: "Added 'Strategic Planning' to weakness tracker."
+    clarity: "Excellent articulation of technical concepts with clear business context.",
+    depth: "Strong understanding of tradeoffs, though could dive deeper into operational excellence.",
+    structure: "Methodical approach to problem-solving, following a logical framework.",
+    redFlags: "None identified.",
+    weaknessTrackerUpdate: "Strategic alignment and scaling complexities."
   };
 
   return (
@@ -78,7 +78,7 @@ const App = () => {
                 onClick={() => setActiveTab('game')}
               >
                 <span className="icon">⚡</span> 
-                {isTechnicalRole(interviewSettings?.role) ? "Tech Sprint" : "Management Sprint"}
+                {isTechnicalRole(interviewSettings?.role) ? "Tech Sprint" : "Leadership Sprint"}
               </button>
             </nav>
 
@@ -96,7 +96,7 @@ const App = () => {
                   {interviewState === 'idle' && (
                     <div className="welcome-box">
                       <h2>Mock Interview</h2>
-                      <p>Start a conversational session for <strong>{interviewSettings?.domainStack}</strong>. AI will push your limits.</p>
+                      <p>Start a conversational session tailored for <strong>{interviewSettings?.domainStack}</strong>. AI will simulate a real company interview.</p>
                       <button className="primary-btn" onClick={() => setInterviewState('ongoing')}>
                         Launch Session 🚀
                       </button>
@@ -119,11 +119,17 @@ const App = () => {
               )}
 
               {activeTab === 'daily' && (
-                <DailyScenario />
+                <DailyScenario 
+                  role={interviewSettings?.role} 
+                  domainStack={interviewSettings?.domainStack} 
+                />
               )}
 
               {activeTab === 'game' && (
-                <SkillGame techStack={interviewSettings?.domainStack} />
+                <SkillGame 
+                  role={interviewSettings?.role} 
+                  domainStack={interviewSettings?.domainStack} 
+                />
               )}
             </div>
           </main>

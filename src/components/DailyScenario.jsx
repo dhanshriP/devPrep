@@ -1,108 +1,110 @@
 import React, { useState, useEffect } from 'react';
+import { callLLM, safeParseJSON } from '../api';
 
-const DailyScenario = () => {
-  const [challengeActive, setChallengeActive] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(180); // 3 minutes = 180 seconds
-  const [challengeCompleted, setChallengeCompleted] = useState(false);
+const DailyScenario = ({ role, domainStack }) => {
+  const [gameState, setGameState] = useState('loading'); // 'loading', 'idle', 'active', 'completed'
+  const [currentChallenge, setCurrentChallenge] = useState(null);
+  const [timeLeft, setTimeLeft] = useState(180);
+  const [error, setError] = useState(null);
 
-  const challenges = [
-    {
-      id: 1,
-      title: "Refactor Legacy Code",
-      description: "Identify and refactor a section of a given legacy Java method to improve readability and performance without changing its core functionality.",
-      solution: "Solution: Focus on extracting helper methods, using clearer variable names, and optimizing loop iterations."
-    },
-    {
-      id: 2,
-      title: "Design a Caching Strategy",
-      description: "Propose a caching strategy for a high-traffic e-commerce product catalog API. Consider consistency, eviction policies, and invalidation.",
-      solution: "Solution: Discuss CDN, in-memory caches (Redis), write-through/write-back, and LRU/LFU eviction."
-    },
-    {
-      id: 3,
-      title: "Debug a Frontend Performance Issue",
-      description: "A React component is re-rendering excessively. Identify potential causes and suggest ways to optimize performance.",
-      solution: "Solution: Use React.memo, useCallback, useMemo, and avoid inline object/function definitions in props."
+  const fetchChallenge = async () => {
+    setGameState('loading');
+    setError(null);
+    try {
+      const isManagement = ["TPM", "Scrum Master", "Delivery Manager"].includes(role);
+      const systemPrompt = `You are an expert technical interviewer. Generate a REAL-WORLD, latest (2024) interview scenario for a ${role} specializing in ${domainStack}. 
+      ${isManagement ? "CRITICAL: This is a management/leadership role. Do NOT ask about coding, caching, or low-level system design. Ask about roadmaps, stakeholder conflict, delivery risks, or agile bottlenecks." : "Focus on high-level architecture and technical trade-offs."}
+      Return ONLY a JSON object:
+      {
+        "title": "A short catchy title",
+        "description": "A detailed 2-3 sentence challenge description based on a real company scenario.",
+        "solution": "A structured 2-3 sentence recommended elite approach."
+      }`;
+      
+      const raw = await callLLM(`Generate a 2024 interview challenge for ${role}`, systemPrompt);
+      const data = safeParseJSON(raw);
+      setCurrentChallenge(data);
+      setGameState('idle');
+    } catch (err) {
+      setError("AI is busy analyzing industry trends. Please refresh.");
+      setGameState('idle');
     }
-  ];
+  };
 
-  const [currentChallenge, setCurrentChallenge] = useState(() => 
-    challenges[Math.floor(Math.random() * challenges.length)]
-  );
+  useEffect(() => {
+    fetchChallenge();
+  }, [role, domainStack]);
 
   useEffect(() => {
     let timer;
-    if (challengeActive && timeLeft > 0) {
-      timer = setInterval(() => {
-        setTimeLeft((prev) => prev - 1);
-      }, 1000);
-    } else if (timeLeft === 0 && challengeActive) {
-      setChallengeCompleted(true);
-      setChallengeActive(false);
+    if (gameState === 'active' && timeLeft > 0) {
+      timer = setInterval(() => setTimeLeft((prev) => prev - 1), 1000);
+    } else if (timeLeft === 0 && gameState === 'active') {
+      setGameState('completed');
     }
     return () => clearInterval(timer);
-  }, [challengeActive, timeLeft]);
+  }, [gameState, timeLeft]);
 
   const formatTime = (seconds) => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
-  const handleStartChallenge = () => {
-    setChallengeActive(true);
-    setChallengeCompleted(false);
-    setTimeLeft(180);
-  };
-
-  const handleResetChallenge = () => {
-    setChallengeActive(false);
-    setChallengeCompleted(false);
-    setTimeLeft(180);
-    setCurrentChallenge(challenges[Math.floor(Math.random() * challenges.length)]);
-  };
+  if (gameState === 'loading') {
+    return (
+      <div className="daily-scenario-container">
+        <div className="loader-ring"></div>
+        <p>Analyzing latest 2024 trends for {role}...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="daily-scenario-container">
-      <div className="header-row">
-         <h3>Daily Challenge</h3>
-         {challengeActive && <span className="timer-pill">Time Left: {formatTime(timeLeft)}</span>}
-      </div>
+      <div className="badge">2024 INDUSTRY CHALLENGE</div>
       
-      <div className="challenge-body">
-        <h4>{currentChallenge.title}</h4>
-        
-        {!challengeActive && !challengeCompleted && (
-          <>
-            <p className="description">{currentChallenge.description}</p>
-            <button className="primary-btn" onClick={handleStartChallenge}>Start 3-Min Challenge</button>
-          </>
-        )}
-
-        {challengeActive && (
-          <div className="active-ui">
-            <p className="description">{currentChallenge.description}</p>
-            <textarea 
-              placeholder="Draft your solution here..." 
-              className="challenge-textarea"
-            ></textarea>
-            <div className="actions">
-               <button className="reset-btn" onClick={handleResetChallenge}>Give Up</button>
-            </div>
+      {currentChallenge && (
+        <div className="challenge-card-pro">
+          <div className="header-row">
+            <h2 className="challenge-title">{currentChallenge.title}</h2>
+            {gameState === 'active' && <div className="timer-pill">⏳ {formatTime(timeLeft)}</div>}
           </div>
-        )}
-
-        {challengeCompleted && (
-          <div className="completed-ui">
-            <div className="success-badge">Challenge Completed!</div>
-            <div className="solution-box">
-              <h5>Recommended Approach:</h5>
-              <p>{currentChallenge.solution}</p>
+          
+          {gameState === 'idle' && (
+            <div className="intro-view">
+              <p className="challenge-desc">{currentChallenge.description}</p>
+              <div className="action-row">
+                <button className="primary-btn" onClick={() => setGameState('active')}>Accept Mission</button>
+                <button className="reset-btn" onClick={fetchChallenge}>Skip Challenge</button>
+              </div>
             </div>
-            <button className="primary-btn" onClick={handleResetChallenge}>Next Challenge</button>
-          </div>
-        )}
-      </div>
+          )}
+
+          {gameState === 'active' && (
+            <div className="active-view">
+              <p className="challenge-desc">{currentChallenge.description}</p>
+              <textarea 
+                className="challenge-textarea-pro" 
+                placeholder="Draft your solution... (Trade-offs, Risks, Strategy)"
+              ></textarea>
+              <button className="primary-btn" onClick={() => setGameState('completed')}>Finalize Solution</button>
+            </div>
+          )}
+
+          {gameState === 'completed' && (
+            <div className="completed-view">
+              <div className="success-banner">✓ CHALLENGE COMPLETED</div>
+              <div className="solution-section">
+                <h4>Elite Solution Strategy:</h4>
+                <p>{currentChallenge.solution}</p>
+              </div>
+              <button className="primary-btn" onClick={fetchChallenge}>Get New Mission</button>
+            </div>
+          )}
+        </div>
+      )}
+      {error && <p className="error-msg">{error}</p>}
     </div>
   );
 };

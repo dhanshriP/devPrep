@@ -1,41 +1,41 @@
 import React, { useState, useEffect } from 'react';
 import { callLLM, safeParseJSON } from '../api';
 
-const SkillGame = ({ techStack }) => {
+const SkillGame = ({ role, domainStack }) => {
   const [gameState, setGameState] = useState('start'); // 'start', 'loading', 'playing', 'result'
   const [questions, setQuestions] = useState([]);
   const [score, setScore] = useState(0);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(20);
+  const [currentIdx, setCurrentIdx] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(15);
   const [selectedOption, setSelectedOption] = useState(null);
+  const [streak, setStreak] = useState(0);
   const [error, setError] = useState(null);
+
+  const isTechnical = ["SDE", "Principal Engineer", "EM"].includes(role);
 
   const fetchQuestions = async () => {
     setGameState('loading');
     setError(null);
     try {
-      const systemPrompt = `You are a technical interviewer assistant. Generate a JSON array of 5 challenging multiple-choice questions for a developer skilled in ${techStack}. 
-      Each object must have:
-      "question": "The question text",
-      "options": ["Option A", "Option B", "Option C", "Option D"],
-      "answer": index_of_correct_option (0-3).
-      Return ONLY the raw JSON array. No markdown, no prose.`;
+      const systemPrompt = `You are a technical game designer for a developer portal. 
+      Generate 5 challenging, unique multiple-choice questions for a ${role} with expertise in ${domainStack}.
       
-      const raw = await callLLM(`Generate 5 technical questions for ${techStack}`, systemPrompt);
+      RULES:
+      - If role is TPM/Scrum Master/Delivery Manager, focus on scenarios: "A stakeholder demands X, what do you do?", "Velocity dropped by 20%, what's the first step?", etc. NO CODING.
+      - If role is SDE/Principal, focus on high-level architecture and deep tech trade-offs.
+      - Each question must have 4 options and 1 correct answer (index 0-3).
+      - Return ONLY a JSON array of objects: [{"question": "...", "options": ["...", "..."], "answer": 0}, ...]`;
+      
+      const raw = await callLLM(`Generate a "Tech Sprint" game for ${role} / ${domainStack}`, systemPrompt);
       const data = safeParseJSON(raw);
-      
-      if (Array.isArray(data) && data.length > 0) {
-        setQuestions(data);
-        setGameState('playing');
-        setCurrentQuestionIndex(0);
-        setScore(0);
-        setTimeLeft(20);
-      } else {
-        throw new Error("Invalid format received from AI");
-      }
+      setQuestions(data);
+      setGameState('playing');
+      setCurrentIdx(0);
+      setScore(0);
+      setStreak(0);
+      setTimeLeft(15);
     } catch (err) {
-      console.error(err);
-      setError("Failed to generate questions. Please try again.");
+      setError("AI was too busy playing games. Try again!");
       setGameState('start');
     }
   };
@@ -45,96 +45,97 @@ const SkillGame = ({ techStack }) => {
     if (gameState === 'playing' && timeLeft > 0) {
       timer = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
     } else if (timeLeft === 0 && gameState === 'playing') {
-      handleNextQuestion();
+      handleAnswer(-1); // Timeout
     }
     return () => clearInterval(timer);
   }, [gameState, timeLeft]);
 
-  const handleOptionClick = (index) => {
+  const handleAnswer = (idx) => {
     if (selectedOption !== null) return;
-    setSelectedOption(index);
-    if (index === questions[currentQuestionIndex].answer) {
-      setScore(prev => prev + 20);
-    }
-    setTimeout(handleNextQuestion, 1000);
-  };
-
-  const handleNextQuestion = () => {
-    setSelectedOption(null);
-    if (currentQuestionIndex < questions.length - 1) {
-      setCurrentQuestionIndex(prev => prev + 1);
-      setTimeLeft(20);
+    
+    setSelectedOption(idx);
+    const correct = idx === questions[currentIdx].answer;
+    
+    if (correct) {
+      const bonus = streak * 2;
+      setScore(prev => prev + 10 + bonus);
+      setStreak(prev => prev + 1);
     } else {
-      setGameState('result');
+      setStreak(0);
     }
+
+    setTimeout(() => {
+      if (currentIdx < questions.length - 1) {
+        setCurrentIdx(prev => prev + 1);
+        setSelectedOption(null);
+        setTimeLeft(15);
+      } else {
+        setGameState('result');
+      }
+    }, 1200);
   };
 
   return (
-    <div className="skill-game-container">
-      <div className="game-header-row">
-        <h2>Tech Sprint: {techStack}</h2>
+    <div className="game-container-pro">
+      <div className="game-header-pro">
+        <div className="game-title">
+           <h2>{isTechnical ? 'Tech Sprint' : 'Leadership Sprint'}</h2>
+           <p className="game-subtitle">Speed & Accuracy Challenge</p>
+        </div>
         {gameState === 'playing' && (
-          <div className="game-stats">
-            <span className="score-pill">Score: {score}</span>
-            <span className="timer-pill">Time: {timeLeft}s</span>
+          <div className="game-meta">
+            <div className="stat-badge">🔥 {streak} Streak</div>
+            <div className="stat-badge">⭐ {score} Pts</div>
+            <div className={`timer-circle ${timeLeft < 5 ? 'urgent' : ''}`}>{timeLeft}</div>
           </div>
         )}
       </div>
 
       {gameState === 'start' && (
-        <div className="game-start-view">
-          <div className="game-icon">⚡</div>
-          <p>Ready to test your expertise in <strong>{techStack}</strong>?</p>
-          <p className="sub-text">AI will generate 5 custom questions based on your profile.</p>
-          {error && <p className="error-text">{error}</p>}
-          <button className="primary-btn" onClick={fetchQuestions}>Generate & Start</button>
+        <div className="start-screen">
+          <div className="game-hero-icon">{isTechnical ? '⚡' : '🛡️'}</div>
+          <h3>Ready for the Sprint?</h3>
+          <p>5 questions. 15 seconds each. Bonus points for streaks.</p>
+          {error && <p className="error-msg">{error}</p>}
+          <button className="primary-btn pulse" onClick={fetchQuestions}>Start Engine</button>
         </div>
       )}
 
       {gameState === 'loading' && (
-        <div className="loading-view">
-          <div className="loader"></div>
-          <p>AI is crafting your technical challenges...</p>
+        <div className="loading-screen">
+          <div className="loader-ring"></div>
+          <p>AI is generating custom challenges...</p>
         </div>
       )}
 
       {gameState === 'playing' && questions.length > 0 && (
-        <div className="game-play-view">
-          <div className="progress-bar">
-            <div 
-              className="progress-fill" 
-              style={{ width: `${((currentQuestionIndex + 1) / questions.length) * 100}%` }}
-            ></div>
-          </div>
-          <div className="question-card">
-            <span className="q-count">Question {currentQuestionIndex + 1} of {questions.length}</span>
-            <h3>{questions[currentQuestionIndex].question}</h3>
-            <div className="options-grid">
-              {questions[currentQuestionIndex].options.map((opt, i) => (
-                <button 
-                  key={i} 
-                  className={`option-btn ${selectedOption === i ? (i === questions[currentQuestionIndex].answer ? 'correct' : 'wrong') : ''}`}
-                  onClick={() => handleOptionClick(i)}
-                  disabled={selectedOption !== null}
-                >
-                  {opt}
-                </button>
-              ))}
-            </div>
+        <div className="play-screen">
+          <div className="q-number">Question {currentIdx + 1} of {questions.length}</div>
+          <h3 className="game-question">{questions[currentIdx].question}</h3>
+          <div className="game-options">
+            {questions[currentIdx].options.map((opt, i) => (
+              <button 
+                key={i} 
+                className={`game-opt-btn ${selectedOption === i ? (i === questions[currentIdx].answer ? 'correct' : 'wrong') : ''} ${selectedOption !== null && i === questions[currentIdx].answer ? 'correct' : ''}`}
+                onClick={() => handleAnswer(i)}
+                disabled={selectedOption !== null}
+              >
+                {opt}
+              </button>
+            ))}
           </div>
         </div>
       )}
 
       {gameState === 'result' && (
-        <div className="game-result-view">
-          <div className="trophy">🏆</div>
-          <h3>Sprint Complete!</h3>
-          <div className="final-score-box">
-            <span className="label">Total Score</span>
-            <span className="value">{score}</span>
+        <div className="result-screen">
+          <div className="medal">{score > 30 ? '🥇' : '🥈'}</div>
+          <h3>Sprint Finished!</h3>
+          <div className="final-stats">
+            <div className="stat"><span>Final Score</span><strong>{score}</strong></div>
+            <div className="stat"><span>Max Streak</span><strong>{streak}</strong></div>
           </div>
-          <p>Your performance in {techStack} has been recorded.</p>
-          <button className="primary-btn" onClick={fetchQuestions}>New Sprint</button>
+          <button className="primary-btn" onClick={fetchQuestions}>Play Again</button>
         </div>
       )}
     </div>
