@@ -26,7 +26,6 @@ const DailyScenario = () => {
     }
   ];
 
-  // For simplicity, let's pick a random challenge each time the component mounts
   const [currentChallenge, setCurrentChallenge] = useState(() => 
     challenges[Math.floor(Math.random() * challenges.length)]
   );
@@ -58,7 +57,6 @@ const DailyScenario = () => {
     setChallengeActive(false);
     setChallengeCompleted(false);
     setTimeLeft(180);
-    // Pick a new random challenge for variety
     setCurrentChallenge(challenges[Math.floor(Math.random() * challenges.length)]);
   };
 
@@ -77,7 +75,7 @@ const DailyScenario = () => {
         <div className="challenge-active">
           <p>Time Left: {formatTime(timeLeft)}</p>
           <p className="challenge-description">{currentChallenge.description}</p>
-          <textarea placeholder="Your thoughts or solution... (not saved)" rows="4" readOnly={timeLeft === 0}></textarea>
+          <textarea placeholder="Your thoughts or solution... (not saved)" rows="4"></textarea>
           {timeLeft === 0 && <p>Time's up!</p>}
         </div>
       )}
@@ -91,9 +89,9 @@ const DailyScenario = () => {
         </div>
       )}
 
-      {(challengeActive || challengeCompleted) && (
-         <button onClick={handleResetChallenge} disabled={challengeActive && timeLeft > 0}>
-            {challengeActive && timeLeft > 0 ? 'Reset' : 'New Daily Challenge'}
+      {(challengeActive || challengeCompleted) && !challengeCompleted && (
+         <button onClick={handleResetChallenge}>
+            Reset
          </button>
       )}
     </div>
