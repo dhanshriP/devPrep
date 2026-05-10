@@ -73,7 +73,7 @@ const SkillGame = ({ role, domainStack }) => {
       if (currentIdx < questions.length - 1) {
         setCurrentIdx(prev => prev + 1);
         setSelectedOption(null);
-        setTimeLeft(30); // Reset to 30s for next question
+        setTimeLeft(30); // Reset to 30s
       } else {
         setGameState('result');
       }
